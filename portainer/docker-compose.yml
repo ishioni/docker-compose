@@ -1,0 +1,21 @@
+version: '3.5'
+services:
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    volumes:
+      - data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9000"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:portainer.${DOMAIN}"
+      traefik.enable: true
+      traefik.passHostHeader: true
+
+volumes:
+  data:
+networks:
+  default:
+    name: ${NETWORK}

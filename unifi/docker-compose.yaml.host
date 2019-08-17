@@ -1,0 +1,70 @@
+version: '3.7'
+services:
+  mongo:
+    container_name: unifi-mongo
+    image: mongo:3.4
+    restart: always
+    network_mode: host
+    volumes:
+      - db:/data/db
+
+  controller:
+    container_name: unifi-controller
+    image: "jacobalberty/unifi:${TAG:-latest}"
+    depends_on:
+      - mongo
+    init: true
+    restart: always
+    volumes:
+      - data:/unifi/data
+      - log:/unifi/log
+      - cert:/unifi/cert
+      - init:/unifi/init.d
+    environment:
+      DB_URI: mongodb://localhost/unifi
+      STATDB_URI: mongodb://localhost/unifi_stat
+      DB_NAME: unifi
+      RUNAS_UID0: "false"
+      TZ: "Europe/Warsaw"
+    network_mode: host
+#    expose:
+#      - "8443" # Web portal
+#    ports:
+#      - "3478:3478/udp" # STUN
+#      - "6789:6789/tcp" # Speed test
+#      - "8080:8080/tcp" # Device/ controller comm.
+#      - "8443:8443/tcp" # Controller GUI/API as seen in a web browser
+#      - "8880:8880/tcp" # HTTP portal redirection
+#      - "8843:8843/tcp" # HTTPS portal redirection
+#      - "10001:10001/udp" # AP discovery
+#     labels:
+#      traefik.port: "8443"
+#      traefik.protocol: "https"
+#      traefik.frontend.rule: "Host: unifi.${DOMAIN}"
+#      traefik.enable: true
+#      traefik.passHostHeader: true
+#      traefik.frontend.headers.STSPreload: true
+#      traefik.frontend.headers.STSSeconds: "31536000"
+#      traefik.frontend.whiteList.useXForwardedFor: true
+#      traefik.frontend.whiteList.sourceRange: "${WHITELISTIP}"
+
+  logs:
+    container_name: unifi-logs
+    image: bash
+    depends_on:
+      - controller
+    command: bash -c 'tail -f /unifi/log/*.log'
+    restart: always
+    volumes:
+      - log:/unifi/log
+
+volumes:
+  db:
+  data:
+  log:
+  cert:
+  init:
+
+#networks:
+#  default:
+#    name: ${NETWORK}

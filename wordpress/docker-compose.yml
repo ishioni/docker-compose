@@ -1,0 +1,25 @@
+version: '3.5'
+services:
+  db:
+    image: mariadb
+    volumes:
+       - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+  wordpress:
+    depends_on: #run after db is running
+       - db
+    image: wordpress
+    restart: always
+    ports:
+      - "19995:80"
+    environment:
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_HOST: db:3306 #apparently mysql using 3306
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+volumes:
+  dbdata:

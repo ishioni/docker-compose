@@ -1,0 +1,30 @@
+version: '3.5'
+services:
+  spigot:
+    image: itzg/minecraft-server
+    container_name: spigot
+    command: --noconsole
+    volumes:
+      - data:/data
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 25565:25565
+      - 8123:8123
+    expose:
+      - "25575"
+    restart: always
+    environment:
+      EULA: "TRUE"
+      LEVEL: ${LEVELNAME}
+      SERVER_NAME: ${SERVER_NAME}
+      DIFFICULTY: ${DIFFICULTY}
+      JVM_XX_OPT: ${JVMOPTS}
+      MEMORY: ${JVMMEM}
+      TYPE: "SPIGOT"
+      TZ: ${TZ}
+      VERSION: 1.13.2
+volumes:
+  data:
+networks:
+  default:
+    name: ${NETWORK}

@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  netdata:
+    image: netdata/netdata:v1.16.0
+    container_name: netdata
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/sensors.d:/etc/sensors.d:ro
+      - netdataconf:/etc/netdata
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      PGID: 996
+    hostname: vault
+    domainname: ${DOMAIN}
+    expose:
+      - "19999"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:vault.${DOMAIN}"
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.headers.STSPreload: true
+      traefik.frontend.headers.STSSeconds: "31536000"
+      traefik.frontend.whiteList.useXForwardedFor: true
+      traefik.frontend.whiteList.sourceRange: "${WHITELISTIP}"
+
+networks:
+  default:
+    name: ${NETWORK}
+
+volumes:
+  netdataconf:

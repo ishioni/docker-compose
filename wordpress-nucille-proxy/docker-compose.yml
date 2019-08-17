@@ -1,0 +1,19 @@
+version: '3.5'
+services:
+  wordpress-nucille-proxy:
+    build: ./conf
+    image: wordpress-nucille-proxy:alpine
+    container_name: wordpress-nucille-proxy
+    expose:
+      - "80"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:wordpress.${DOMAIN}"
+      traefik.enable: true
+
+networks:
+  default:
+    external:
+      name: traefik

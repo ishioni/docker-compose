@@ -1,0 +1,32 @@
+version: '3.5'
+services:
+  unms:
+    image: oznu/unms:latest
+    container_name: unms
+    volumes:
+      - config:/config
+    expose:
+      - "80"
+      - "443"
+    environment:
+      TZ: "Europe/Warsaw"
+    ports:
+      - "2055:2055/udp"
+    labels:
+      traefik.enable: true
+      traefik.port: "443"
+      traefik.protocol: "https"
+      traefik.frontend.rule: "Host:unms.${DOMAIN}"
+      traefik.passHostHeader: true
+      traefik.frontend.headers.STSPreload: true
+      traefik.frontend.headers.STSSeconds: "31536000"
+      traefik.frontend.whiteList.useXForwardedFor: true
+      traefik.frontend.whiteList.sourceRange: "${WHITELISTIP}"
+    restart: always
+
+volumes:
+  config:
+
+networks:
+  default:
+    name: ${NETWORK}

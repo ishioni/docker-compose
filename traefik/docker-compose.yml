@@ -1,0 +1,79 @@
+version: '3.5'
+services:
+  acmesh:
+    image: neilpang/acme.sh
+    container_name: acmesh
+    command: daemon
+    volumes:
+      - certs:/certs
+      - acme:/acme.sh
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  traefik:
+    image: traefik:alpine
+    container_name: traefik
+    command:
+      - --entryPoints=Name:https Address::443 TLS:MinVersion:VersionTLS12 TLS:/certs/fullchain.pem,/certs/key.pem
+      - --entryPoints=Name:http Address::80 Redirect.EntryPoint:https
+      - --entryPoints=Name:admin Address::8080 Compress:true
+      - --api
+      - --api.entrypoint=admin
+      - --defaultEntryPoints=http,https
+      - --docker
+      - --docker.exposedbydefault=false
+      - --file
+      - --file.directory=/config/
+      - --file.watch
+      - --logLevel=INFO
+      - --insecureskipverify=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - auth:/auth
+      - config:/config
+      - certs:/certs
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "8080"
+    networks:
+      - authelia
+      - mediaapps
+      - netdata
+      - nextcloud
+        #- speedtest
+      - unifi
+    labels:
+      traefik.frontend.rule: "Host:${DOMAIN}"
+      traefik.port: "8080"
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.headers.STSPreload: true
+      traefik.frontend.headers.STSSeconds: "31536000"
+      traefik.frontend.whiteList.useXForwardedFor: true
+      traefik.frontend.whiteList.sourceRange: "${WHITELISTIP}"
+    restart: always
+
+volumes:
+  acme:
+  auth:
+  certs:
+  config:
+
+networks:
+  default:
+    name: ${NETWORK}
+  authelia:
+    external: true
+  mediaapps:
+    external: true
+  netdata:
+    external: true
+  nextcloud:
+    external: true
+    #speedtest:
+    #  external: true
+  unifi:
+    external: true

@@ -1,0 +1,25 @@
+version: '3.5'
+services:
+  speedtest:
+    image: roest/docker-speedtest-analyser
+    container_name: speedtest
+    volumes:
+      - data:/var/www/html/data
+    expose:
+      - "80"
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: "Host:speed.${DOMAIN}"
+      traefik.passHostHeader: true
+      traefik.frontend.headers.STSPreload: true
+      traefik.frontend.headers.STSSeconds: "31536000"
+      traefik.frontend.whiteList.useXForwardedFor: true
+      traefik.frontend.whiteList.sourceRange: "${WHITELISTIP}"
+    restart: always
+
+volumes:
+  data:
+
+networks:
+  default:
+    name: ${NETWORK}

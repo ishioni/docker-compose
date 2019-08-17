@@ -1,0 +1,28 @@
+version: '3.5'
+services:
+  authelia:
+    image: clems4ever/authelia:v3.12.0
+    container_name: authelia
+    volumes:
+      - authelia:/etc/authelia
+    expose:
+      - "8080"
+    labels:
+      traefik.enable: true
+      traefik.frontend.rule: "Host:auth.${DOMAIN}"
+      traefik.passHostHeader: true
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: authelia-redis
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+volumes:
+  authelia:
+
+networks:
+  default:
+    name: ${NETWORK}

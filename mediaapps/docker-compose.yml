@@ -1,0 +1,94 @@
+version: '3.5'
+services:
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    volumes:
+      - transmission:/config
+      - ${MEDIAPATH}:/media
+    environment:
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TZ}
+    ports:
+      - "51413:51413"
+      - "51413:51413/udp"
+    expose:
+      - "9091"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:torrent.${DOMAIN}"
+      traefik.port: 9091
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.auth.forward.address: "https://auth.${DOMAIN}/api/verify?rd=https://auth.${DOMAIN}?rd=https://torrent.${DOMAIN}"
+      traefik.frontend.headers.customRequestHeaders: "X-ORIGINAL-URL:https://torrent.${DOMAIN}"
+
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    volumes:
+      - jackett:/config
+    environment:
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TZ}
+    expose:
+      - "9117"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:jackett.${DOMAIN}"
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.auth.forward.address: "https://auth.${DOMAIN}/api/verify?rd=https://auth.${DOMAIN}?rd=https://jackett.${DOMAIN}"
+      traefik.frontend.headers.customRequestHeaders: "X-ORIGINAL-URL:https://jackett.${DOMAIN}"
+
+  couchpotato:
+    image: linuxserver/couchpotato
+    container_name: couchpotato
+    volumes:
+      - couchpotato:/config
+      - ${MEDIAPATH}:/media
+    environment:
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TZ}
+    expose:
+      - "5050"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:movies.${DOMAIN}"
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.auth.forward.address: "https://auth.${DOMAIN}/api/verify?rd=https://auth.${DOMAIN}?rd=https://movies.${DOMAIN}"
+      traefik.frontend.headers.customRequestHeaders: "X-ORIGINAL-URL:https://movies.${DOMAIN}"
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    volumes:
+      - sonarr:/config
+      - ${MEDIAPATH}:/media
+    environment:
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TZ}
+    expose:
+      - "8989"
+    restart: always
+    labels:
+      traefik.frontend.rule: "Host:tv.${DOMAIN}"
+      traefik.enable: true
+      traefik.passHostHeader: true
+      traefik.frontend.auth.forward.address: "https://auth.${DOMAIN}/api/verify?rd=https://auth.${DOMAIN}?rd=https://tv.${DOMAIN}"
+      traefik.frontend.headers.customRequestHeaders: "X-ORIGINAL-URL:https://tv.${DOMAIN}"
+
+networks:
+  default:
+    name: ${NETWORK}
+
+volumes:
+  couchpotato:
+  jackett:
+  transmission:
+  sonarr:
