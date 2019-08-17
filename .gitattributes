@@ -1,0 +1,2 @@
+.env filter=git-crypt diff=git-crypt
+traefik/servers.toml filter=git-crypt diff=git-crypt

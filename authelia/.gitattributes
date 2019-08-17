@@ -1,0 +1,2 @@
+config.yml filter=git-crypt diff=git-crypt
+users.yml filter=git-crypt diff=git-crypt
